@@ -10,10 +10,11 @@
         margin: 0;
       }
       body{
+        width: 100vw;
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 30px;
       }
       #canvas{
         border:1px solid black;
@@ -29,12 +30,12 @@
       const ctx = canvas.getContext('2d');
       let up,down,left,right = false;
       let Players = [];
-      var x = 0, y = 0;
+      var x = 0, y = 0 , w = 20 , h = 20;
       let velocidade = 1;
       
       socket.on('Players', (data) => {
         Players = data;
-        atualizaPlayerTela();
+        atualizaPlayersTela();
       });
 
       function init(){
@@ -43,21 +44,24 @@
         draw();
         move();
         colision();
+        emissoes();
 
         requestAnimationFrame(init);
       }
 
-      function atualizaPlayerTela(){
+      function atualizaPlayersTela(){
         Players.forEach((e)=>{
           ctx.fillStyle = 'black';
-          ctx.fillRect(e.x,e.y,20,20);
+          ctx.fillRect(e.x,e.y,w,h);
+          ctx.textAlign = 'center';
+          ctx.fillText(e.name,e.x+w/2,e.y-10)
         })
       }
 
       function draw(){
         ctx.beginPath();
         //AQUI ENTRA A CRIAÇÃO DAS COISAS NA TELA
-        atualizaPlayerTela();
+        atualizaPlayersTela();
         //DRAW ACABA AQUI
         ctx.closePath();
       }
@@ -104,7 +108,7 @@
         if(left){x-=velocidade};
         if(right){x+=velocidade};
 
-        socket.emit('move', { x, y });
+        
       };
 
       function colision(){
@@ -113,6 +117,9 @@
           //COLISÃO ACABA AQUI
       };
 
+      function emissoes(){
+        socket.emit('move', { x, y });
+      };
       init();
     </script>
   </body>
