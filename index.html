@@ -113,7 +113,10 @@
 
       function colision(){
           //AQUI ENTRA A COLISAO
-
+          if(x+w>canvas.width) x=canvas.width-w;
+          if(x<0)x=0;
+          if(y<0)y=0;
+          if(y+h>canvas.height) y = canvas.height-h;
           //COLISÃO ACABA AQUI
       };
 
