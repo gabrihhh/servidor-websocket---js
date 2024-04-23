@@ -31,7 +31,7 @@
       let up,down,left,right = false;
       let Players = [];
       var x = 0, y = 0 , w = 20 , h = 20;
-      let velocidade = 1;
+      let velocidade = 3;
       
       socket.on('Players', (data) => {
         Players = data;
@@ -117,6 +117,7 @@
           if(x<0)x=0;
           if(y<0)y=0;
           if(y+h>canvas.height) y = canvas.height-h;
+
           //COLISÃO ACABA AQUI
       };
 

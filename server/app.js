@@ -16,8 +16,8 @@ app.get('/game', (req, res) => {
   res.sendFile(join(__dirname, '../index.html'));
 });
 
-app.get('/',(req,res)=>{
-  res.sendFile(join(__dirname,'../home.html'));
+app.get('/', (req, res) => {
+  res.sendFile(join(__dirname, '../home.html'));
 });
 
 app.post('/', (req, res) => {
@@ -28,29 +28,26 @@ app.post('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  if(nome !== ''){
+  Players.push({ id: socket.id, x: 0, y: 0, name: nome })
+  socket.emit('Players', Players);
+  console.log('Novo usuário conectado. ID do socket:', socket.id);
 
-    Players.push({ id: socket.id, x: 0, y: 0, name: nome})
+
+  socket.on('move', (coords) => {
+    Players = Players.map((e) => {
+      if (e.id == socket.id) {
+        e.x = coords.x;
+        e.y = coords.y;
+      }
+      return e;
+    });
     socket.emit('Players', Players);
-    console.log('Novo usuário conectado. ID do socket:', socket.id);
+  });
 
-
-    socket.on('move', (coords) => {
-      Players = Players.map((e)=>{
-        if(e.id == socket.id){
-          e.x = coords.x;
-          e.y = coords.y;
-        }
-        return e;
-      });
-      socket.emit('Players', Players);
-    });
-
-    socket.on('disconnect', () => {
-      Players = Players.filter((e)=>e.id !== socket.id);
-      console.log('Usuário desconectado. ID do socket:', socket.id);
-    });
-  };
+  socket.on('disconnect', () => {
+    Players = Players.filter((e) => e.id !== socket.id);
+    console.log('Usuário desconectado. ID do socket:', socket.id);
+  });
 });
 
 server.listen(3000, () => {
