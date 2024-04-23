@@ -5,44 +5,115 @@
     <title>Socket.IO chat</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
-
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }
+      *{
+        padding: 0;
+        margin: 0;
+      }
+      body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      }
+      #canvas{
+        border:1px solid black;
+      }
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button type="submit">Send</button>
-    </form>
+
+    <canvas id="canvas" width="800" height="500"></canvas>
     <script>
-        const socket = io();
-        
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
-        
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = ''
-            }
+      const socket = io();
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      let up,down,left,right = false;
+      let Players = [];
+      var x = 0, y = 0;
+      let velocidade = 1;
+      
+      socket.on('Players', (data) => {
+        Players = data;
+        atualizaPlayerTela();
+      });
+
+      function init(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        draw();
+        move();
+        colision();
+
+        requestAnimationFrame(init);
+      }
+
+      function atualizaPlayerTela(){
+        Players.forEach((e)=>{
+          ctx.fillStyle = 'black';
+          ctx.fillRect(e.x,e.y,20,20);
+        })
+      }
+
+      function draw(){
+        ctx.beginPath();
+        //AQUI ENTRA A CRIAÇÃO DAS COISAS NA TELA
+        atualizaPlayerTela();
+        //DRAW ACABA AQUI
+        ctx.closePath();
+      }
+
+      function move(){
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowUp'){
+            down = false;
+            up = true;
+          };
+          if (event.key === 'ArrowDown'){
+            up = false;
+            down = true;
+          };
+          if (event.key === 'ArrowLeft'){
+            right = false;
+            left = true;
+          };
+          if (event.key === 'ArrowRight'){
+            left = false;
+            right = true;
+          };
         });
-        
-        socket.on('chat message', (msg) => {
-            const item = document.createElement('li');
-            item.textContent = msg;
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
+
+
+        document.addEventListener('keyup',(event) => {
+          if (event.key === 'ArrowUp'){
+            up = false;
+          };
+          if (event.key === 'ArrowDown'){
+            down = false;
+          };
+          if (event.key === 'ArrowLeft'){
+            left = false;
+          };
+          if (event.key === 'ArrowRight'){
+            right = false;
+          };
+        })
+
+
+        if(up){ y-=velocidade};
+        if(down){ y+=velocidade};
+        if(left){x-=velocidade};
+        if(right){x+=velocidade};
+
+        socket.emit('move', { x, y });
+      };
+
+      function colision(){
+          //AQUI ENTRA A COLISAO
+
+          //COLISÃO ACABA AQUI
+      };
+
+      init();
     </script>
   </body>
 </html>

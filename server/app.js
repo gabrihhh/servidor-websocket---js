@@ -7,15 +7,31 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.get('/chat', (req, res) => {
+var Players = [];
+app.get('/', (req, res) => {
   res.sendFile(join(__dirname, '../index.html'));
 });
 
 io.on('connection', (socket) => {
-  socket.broadcast.emit('hi');
+  Players.push({ id: socket.id, x: 0, y: 0 })
+  socket.emit('Players', Players);
+  console.log('Novo usuário conectado. ID do socket:', socket.id);
 
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+
+  socket.on('move', (coords) => {
+    Players = Players.map((e)=>{
+      if(e.id == socket.id){
+        e.x = coords.x;
+        e.y = coords.y;
+      }
+      return e;
+    });
+    socket.emit('Players', Players);
+  });
+
+  socket.on('disconnect', () => {
+    Players = Players.filter((e)=>e.id !== socket.id);
+    console.log('Usuário desconectado. ID do socket:', socket.id);
   });
 });
 
